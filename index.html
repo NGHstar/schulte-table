@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Schulte Table</title>
+
+    <style>
+      :root {
+        --bg: #101214;
+        --panel: #171a1d;
+        --panel2: #1d2125;
+        --border: #2b3137;
+        --text: #ececec;
+        --muted: #8d949b;
+        --blue: #33475c;
+        --blueHover: #3d546d;
+        --green: #7db58b;
+        --orange: #c48763;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: Inter, sans-serif;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: auto;
+        padding: 14px;
+      }
+
+      .app {
+        width: min(1600px, 100%);
+        height: 95vh;
+        display: grid;
+        grid-template-columns: 300px 1fr 320px;
+        gap: 18px;
+      }
+
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 26px;
+        padding: 20px;
+        height: 100%;
+      }
+
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .title {
+        font-size: 24px;
+        font-weight: 700;
+      }
+
+      .group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      label {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      select {
+        background: var(--panel2);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 12px;
+        outline: none;
+        font-size: 14px;
+      }
+
+      .toggle {
+        background: var(--panel2);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 12px 14px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: #667380;
+      }
+
+      .scale-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .scale-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      #scaleSlider {
+        width: 100%;
+        accent-color: #667380;
+      }
+
+      #scaleValue {
+        color: var(--muted);
+        font-size: 13px;
+        min-width: 40px;
+        text-align: right;
+      }
+
+      button {
+        border: none;
+        outline: none;
+        border-radius: 10px;
+        padding: 14px;
+        cursor: pointer;
+        transition: 0.2s;
+        color: var(--text);
+        font-size: 14px;
+      }
+
+      #resetBtn {
+        font-size: 1.1rem;
+        border-radius: 16px;
+        padding-bottom: 0.75rem;
+        background: var(--blue);
+      }
+
+      #resetBtn:hover {
+        background: var(--blueHover);
+      }
+
+      #clearHistoryBtn {
+        height: 35px;
+        width: 80px;
+        padding-top: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--panel2);
+        border: 1px solid var(--border);
+      }
+
+      #clearHistoryBtn:hover {
+        background: #272d33;
+      }
+
+      .main {
+        padding: 2rem 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        overflow: hidden;
+      }
+
+      .topbar {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .stat {
+        background-color: #1d2125;
+        border-radius: 5px;
+        padding: 0.5rem 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .stat small {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .stat strong {
+        font-size: 25px;
+      }
+
+      @media (min-width: 1000px) {
+        .topbar {
+          justify-content: space-around;
+          gap: 3rem;
+          margin-bottom: 2rem;
+        }
+        .stat {
+          border-radius: 12px;
+          padding: 1rem 2rem;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+        .stat strong {
+          font-size: 30px;
+        }
+      }
+
+      .grid {
+        --gridScale: 1;
+        width: min(
+          calc(40vw * var(--gridScale)),
+          calc(40vh * var(--gridScale))
+        );
+        height: min(
+          calc(40vw * var(--gridScale)),
+          calc(40vh * var(--gridScale))
+        );
+        display: grid;
+        gap: 8px;
+        transition: 0.2s ease;
+      }
+
+      .cell {
+        background: var(--panel2);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+        transition: 0.15s;
+        font-weight: 600;
+      }
+
+      .cell:hover {
+        background: #262c31;
+      }
+
+      .cell:active {
+        background: #3c454d;
+      }
+
+      .cell.start-cell {
+        background: var(--blue);
+        border-color: #41576d;
+      }
+
+      .cell.start-cell:hover {
+        background: var(--blueHover);
+      }
+
+      .note {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .history-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        overflow: hidden;
+      }
+
+      .history-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .history-title {
+        font-size: 20px;
+        font-weight: 600;
+      }
+
+      .history {
+        flex: 1;
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding-right: 12px;
+      }
+
+      .history::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .history::-webkit-scrollbar-thumb {
+        background: #2c3339;
+        border-radius: 999px;
+      }
+
+      .history::-webkit-scrollbar-thumb:hover {
+        background: #3e4750;
+      }
+
+      .history::-webkit-scrollbar-thumb:active {
+        background: #46505a;
+      }
+
+      .history-item {
+        position: relative;
+        background: var(--panel2);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .history-status {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+      }
+
+      .history-status.success {
+        background: var(--green);
+      }
+
+      .history-status.fail {
+        background: var(--orange);
+      }
+
+      .history-item strong {
+        font-size: 18px;
+      }
+
+      .history-item span {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(20px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: 0.35s ease;
+        z-index: 100;
+      }
+
+      .modal.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .modal-card {
+        width: min(420px, 90vw);
+        background: #171b1f;
+        border: 1px solid #2c3339;
+        border-radius: 28px;
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        text-align: center;
+        transform: translateY(20px) scale(0.92);
+        opacity: 0;
+        transition: 0.35s ease;
+      }
+
+      .modal.active .modal-card {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+      }
+
+      .modal-card h2 {
+        font-size: 30px;
+      }
+
+      .modal-card h2.success {
+        color: var(--green);
+      }
+
+      .modal-card h2.fail {
+        color: var(--orange);
+      }
+
+      .modal-card p {
+        color: #b2b8bf;
+        line-height: 1.9;
+      }
+
+      .modal-card button {
+        background: var(--panel2);
+        border: 1px solid var(--border);
+      }
+
+      .modal-card button:hover {
+        background: #272d33;
+      }
+
+      @media (max-width: 1200px) {
+        .app {
+          grid-template-columns: 1fr;
+          height: auto;
+        }
+
+        .panel {
+          height: auto;
+        }
+
+        .main {
+        }
+
+        .topbar {
+          width: min(72vw, 72vw);
+        }
+
+        .grid {
+          width: min(72vw, 72vw);
+          height: min(72vw, 72vw);
+        }
+
+        .scale-group {
+          display: none;
+        }
+
+        .history {
+          max-height: 400px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="app">
+      <aside class="panel sidebar">
+        <div class="title">Schulte Table</div>
+
+        <div class="group">
+          <label>Grid Size</label>
+          <select id="sizeSelect"></select>
+        </div>
+
+        <div class="group">
+          <label>Timer</label>
+          <select id="timeSelect"></select>
+        </div>
+
+        <div class="scale-group">
+          <label>Grid Scale</label>
+
+          <div class="scale-wrapper">
+            <input
+              type="range"
+              id="scaleSlider"
+              min="1"
+              max="1.5"
+              step="0.1"
+              value="1"
+            />
+            <span id="scaleValue">1x</span>
+          </div>
+        </div>
+
+        <div class="toggle">
+          <span>Shuffle On Click</span>
+          <input type="checkbox" id="shuffleToggle" />
+        </div>
+
+        <button id="resetBtn">Reset</button>
+      </aside>
+
+      <main class="panel main">
+        <div class="topbar">
+          <div class="stat">
+            <small>Next Number</small>
+            <strong id="target">1</strong>
+          </div>
+
+          <div class="stat">
+            <small>Time Left</small>
+            <strong id="timer">00:00</strong>
+          </div>
+        </div>
+
+        <div class="grid" id="grid"></div>
+
+        <div class="note">Timer starts after clicking number 1</div>
+      </main>
+
+      <aside class="panel history-panel">
+        <div class="history-header">
+          <div class="history-title">History</div>
+          <button id="clearHistoryBtn">Clear</button>
+        </div>
+        <div class="history" id="history"></div>
+      </aside>
+    </div>
+
+    <div class="modal" id="modal">
+      <div class="modal-card">
+        <h2 id="modalTitle">Congrats</h2>
+        <p id="resultText"></p>
+        <button id="okBtn">OK</button>
+      </div>
+    </div>
+
+    <script>
+      const sizeSelect = document.getElementById("sizeSelect");
+      const timeSelect = document.getElementById("timeSelect");
+      const shuffleToggle = document.getElementById("shuffleToggle");
+      const scaleSlider = document.getElementById("scaleSlider");
+      const scaleValue = document.getElementById("scaleValue");
+      const grid = document.getElementById("grid");
+      const targetEl = document.getElementById("target");
+      const timerEl = document.getElementById("timer");
+      const resetBtn = document.getElementById("resetBtn");
+      const historyEl = document.getElementById("history");
+      const clearHistoryBtn = document.getElementById("clearHistoryBtn");
+
+      const modal = document.getElementById("modal");
+      const modalTitle = document.getElementById("modalTitle");
+      const resultText = document.getElementById("resultText");
+      const okBtn = document.getElementById("okBtn");
+
+      let currentSize = 5;
+      let currentTime = 60;
+      let numbers = [];
+      let nextNumber = 1;
+      let remaining = currentTime;
+      let timer = null;
+      let started = false;
+      let cancelled = false;
+
+      for (let i = 3; i <= 10; i++) {
+        const option = document.createElement("option");
+        option.value = i;
+        option.textContent = `${i} × ${i}`;
+
+        if (i === 5) {
+          option.selected = true;
+        }
+
+        sizeSelect.appendChild(option);
+      }
+
+      for (let i = 30; i <= 300; i += 30) {
+        const option = document.createElement("option");
+        option.value = i;
+        option.textContent = `${i} Seconds`;
+
+        if (i === 60) {
+          option.selected = true;
+        }
+
+        timeSelect.appendChild(option);
+      }
+
+      function shuffle(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+      }
+
+      function formatTime(sec) {
+        const m = String(Math.floor(sec / 60)).padStart(2, "0");
+        const s = String(sec % 60).padStart(2, "0");
+        return `${m}:${s}`;
+      }
+
+      function updateScale() {
+        if (window.innerWidth <= 1200) {
+          return;
+        }
+
+        const value = scaleSlider.value;
+        grid.style.setProperty("--gridScale", value);
+        scaleValue.textContent = `${value}x`;
+      }
+
+      scaleSlider.addEventListener("input", updateScale);
+
+      function generateGrid() {
+        currentSize = +sizeSelect.value;
+        currentTime = +timeSelect.value;
+
+        clearInterval(timer);
+
+        started = false;
+        cancelled = false;
+        nextNumber = 1;
+        remaining = currentTime;
+        targetEl.textContent = "1";
+        timerEl.textContent = formatTime(remaining);
+        numbers = [];
+
+        for (let i = 1; i <= currentSize * currentSize; i++) {
+          numbers.push(i);
+        }
+
+        shuffle(numbers);
+
+        grid.innerHTML = "";
+        grid.style.gridTemplateColumns = `repeat(${currentSize},1fr)`;
+        grid.style.gridTemplateRows = `repeat(${currentSize},1fr)`;
+
+        const fontSize = Math.max(15, 30 - currentSize * 2);
+
+        numbers.forEach((num) => {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+
+          if (num === 1) {
+            cell.classList.add("start-cell");
+          }
+
+          cell.textContent = num;
+          cell.style.fontSize = `${fontSize}px`;
+
+          cell.addEventListener("click", () => handleClick(num));
+          grid.appendChild(cell);
+        });
+      }
+
+      function startTimer() {
+        timer = setInterval(() => {
+          remaining--;
+          timerEl.textContent = formatTime(remaining);
+          if (remaining <= 0) {
+            clearInterval(timer);
+            finishGame(false);
+          }
+        }, 1000);
+      }
+
+      function handleClick(num) {
+        if (remaining <= 0) return;
+
+        if (num !== nextNumber) return;
+
+        if (num === 1 && !started) {
+          started = true;
+          document.querySelector(".start-cell")?.classList.remove("start-cell");
+          startTimer();
+        }
+
+        nextNumber++;
+        targetEl.textContent = nextNumber;
+
+        if (nextNumber > currentSize * currentSize) {
+          clearInterval(timer);
+          finishGame(true);
+        }
+
+        if (shuffleToggle.checked) {
+          reshuffleGrid();
+        }
+      }
+
+      function reshuffleGrid() {
+        shuffle(numbers);
+        const cells = [...document.querySelectorAll(".cell")];
+
+        cells.forEach((cell, index) => {
+          const value = numbers[index];
+          cell.textContent = value;
+          cell.onclick = () => handleClick(value);
+        });
+      }
+
+      function finishGame(success) {
+        const reached = nextNumber - 1;
+        const total = currentSize * currentSize;
+        const usedTime = currentTime - remaining;
+
+        const result = {
+          reached,
+          total,
+          size: currentSize,
+          gameTime: currentTime,
+          usedTime,
+          success,
+        };
+
+        saveHistory(result);
+        showModal(result);
+        generateGrid();
+      }
+
+      function saveHistory(entry) {
+        if (cancelled) return;
+
+        const data = JSON.parse(
+          localStorage.getItem("schulte-history") || "[]",
+        );
+
+        data.unshift(entry);
+
+        localStorage.setItem("schulte-history", JSON.stringify(data));
+        renderHistory();
+      }
+
+      function renderHistory() {
+        historyEl.innerHTML = "";
+
+        const data = JSON.parse(
+          localStorage.getItem("schulte-history") || "[]",
+        );
+
+        data.forEach((item) => {
+          const div = document.createElement("div");
+          div.className = "history-item";
+
+          div.innerHTML = `
+            <div class="history-status ${item.success ? "success" : "fail"}"></div>
+            <strong>${item.reached}/${item.total}</strong>
+            <span>Grid: ${item.size}×${item.size}</span>
+            <span>Timer: ${item.gameTime}s</span>
+            <span>Your Time: ${item.usedTime}s</span>
+            <span>Status: ${item.success ? "Success" : "Time Out"}</span>
+        `;
+
+          historyEl.appendChild(div);
+        });
+      }
+
+      function showModal(data) {
+        modal.classList.add("active");
+
+        if (data.success) {
+          modalTitle.textContent = "Congrats";
+          modalTitle.className = "success";
+        } else {
+          modalTitle.textContent = "Time out!";
+          modalTitle.className = "fail";
+        }
+
+        resultText.innerHTML = `
+        Result: ${data.reached}/${data.total}<br>
+        Timer: ${data.gameTime} second<br>
+        Your Time: ${data.usedTime} second
+    `;
+      }
+
+      okBtn.addEventListener("click", () => {
+        modal.classList.remove("active");
+      });
+
+      resetBtn.addEventListener("click", () => {
+        cancelled = true;
+
+        generateGrid();
+      });
+
+      clearHistoryBtn.addEventListener("click", () => {
+        const sure = confirm("Are you sure?");
+
+        if (!sure) return;
+
+        localStorage.removeItem("schulte-history");
+        renderHistory();
+      });
+
+      sizeSelect.addEventListener("change", generateGrid);
+      timeSelect.addEventListener("change", generateGrid);
+
+      generateGrid();
+      renderHistory();
+      updateScale();
+    </script>
+  </body>
+</html>
