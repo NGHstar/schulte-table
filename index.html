@@ -4,9 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Schulte Table</title>
-    
-    <link rel="icon" type="image/svg+xml" href="logo.svg"> 
-    
+
+    <link rel="icon" type="image/svg+xml" href="logo.svg" />
+
     <style>
       :root {
         --bg: #101214;
@@ -471,7 +471,7 @@
               min="1"
               max="1.5"
               step="0.1"
-              value="1"
+              value="1.2"
             />
             <span id="scaleValue">1x</span>
           </div>
@@ -539,7 +539,7 @@
       const okBtn = document.getElementById("okBtn");
 
       let currentSize = 5;
-      let currentTime = 60;
+      let currentTime = 30;
       let numbers = [];
       let nextNumber = 1;
       let remaining = currentTime;
@@ -564,7 +564,7 @@
         option.value = i;
         option.textContent = `${i} Seconds`;
 
-        if (i === 60) {
+        if (i === 30) {
           option.selected = true;
         }
 
